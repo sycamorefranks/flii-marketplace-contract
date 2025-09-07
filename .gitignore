@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+*.log
+
+# Rust/Solana
+target/
+Cargo.lock
+test-ledger/
+.anchor/
+**/*.rs.bk
+
+# IDL
+target/idl/
+target/types/
+
+# Environment
+.env
+.env.local
+*.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+coverage/
+.nyc_output/
+
+# Keys (NEVER commit these!)
+*.json
+!package.json
+!tsconfig.json
+!Anchor.toml
+keypairs/
+wallets/

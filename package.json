@@ -1,0 +1,32 @@
+{
+  "name": "@fliidotdev/marketplace-contracts",
+  "version": "0.1.0",
+  "description": "Solana smart contracts for FLII.dev marketplace",
+  "scripts": {
+    "build": "anchor build",
+    "test": "anchor test",
+    "test:integration": "ts-mocha -p ./tsconfig.json -t 1000000 tests/integration/**/*.ts",
+    "deploy:devnet": "anchor deploy --provider.cluster devnet",
+    "deploy:mainnet": "anchor deploy --provider.cluster mainnet-beta",
+    "lint": "cargo clippy --all-targets --all-features -- -D warnings",
+    "sdk:build": "cd sdk && npm run build",
+    "sdk:publish": "cd sdk && npm publish"
+  },
+  "devDependencies": {
+    "@coral-xyz/anchor": "^0.29.0",
+    "@solana/web3.js": "^1.87.6",
+    "@types/chai": "^4.3.11",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.11.0",
+    "chai": "^4.3.10",
+    "mocha": "^10.2.0",
+    "ts-mocha": "^10.0.0",
+    "typescript": "^5.3.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fliidotdev/marketplace-contracts.git"
+  },
+  "author": "fliidotdev",
+  "license": "MIT"
+}
