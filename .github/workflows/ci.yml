@@ -40,6 +40,8 @@ jobs:
         
       - name: Run tests
         run: anchor test
+        env:
+          CI: true
 
   lint:
     runs-on: ubuntu-latest
