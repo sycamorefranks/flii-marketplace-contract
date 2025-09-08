@@ -1,53 +1,69 @@
-# Marketplace Contracts
+<div align="center">
+  <h1>
+    <br/>
+    <img src="https://raw.githubusercontent.com/fliidotdev/marketplace-contracts/main/assets/logo.svg" alt="Marketplace" width="200"/>
+    <br/>
+    NFT Marketplace Smart Contracts
+    <br/>
+  </h1>
 
-Solana smart contracts for the FLII.dev component marketplace.
+  <h3>Solana Programs for NFT Trading and Component Marketplace</h3>
 
-## Programs
+  <p>
+    <a href="https://github.com/fliidotdev/marketplace-contracts/actions"><img src="https://img.shields.io/badge/build-passing-brightgreen?style=flat-square" alt="Build Status" /></a>
+    <a href="https://github.com/fliidotdev/marketplace-contracts"><img src="https://img.shields.io/badge/tests-passing-brightgreen?style=flat-square" alt="Tests" /></a>
+    <a href="https://github.com/fliidotdev/marketplace-contracts"><img src="https://img.shields.io/badge/audit-pending-yellow?style=flat-square" alt="Audit" /></a>
+    <a href="https://github.com/fliidotdev/marketplace-contracts/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License" /></a>
+    <a href="https://twitter.com/fliidotdev"><img src="https://img.shields.io/badge/X-@fliidotdev-black?style=flat-square&logo=x" alt="X (Twitter)" /></a>
+  </p>
+</div>
+
+---
+
+## 🚀 Overview
+
+Professional Solana smart contracts powering NFT and component marketplace functionality with advanced features including escrow management, auction systems, and fee distribution.
+
+### Features
+
+- 🔒 **Secure Escrow** - PDA-based escrow accounts for safe trading
+- 🎯 **Auction System** - Time-based auctions with automatic bid refunds
+- 💰 **Fee Management** - Platform and creator fee distribution
+- 📝 **Offer System** - Make and accept offers on listings
+- ⚡ **Optimized** - Gas-efficient program design
+- 🛡️ **Battle-tested** - Comprehensive test coverage
+
+## 📦 Programs
 
 ### Marketplace Program
-Core marketplace functionality:
+- NFT listing creation and management
+- Fixed price and auction listings
+- Bid placement and automatic refunds
+- Offer and counter-offer system
+- Fee distribution mechanism
+
+### Component Registry
 - Component listing and discovery
-- Purchase transactions with automatic revenue distribution
-- 70/30 creator/platform split
-- Component access control
+- Version management
+- License verification
+- Usage tracking
 
-### Revenue Share Program
-Automated revenue distribution:
-- Configurable revenue splits
-- Batch payment processing
-- Real-time creator payouts
-- Platform fee collection
-
-### Token Program
-$FLII token implementation:
-- SPL token with metadata
-- Staking mechanisms
-- Governance features
-- Reward distribution
-
-## Architecture
-Component Purchase Flow:
-
-Buyer initiates purchase
-Smart contract validates payment
-Automatic split: 70% to creator, 30% to platform
-Purchase record created on-chain
-Access granted to buyer
-
-
-## Development
+## 🛠️ Development
 
 ### Prerequisites
-- Rust 1.75+
-- Solana CLI 1.17+
-- Anchor 0.29+
-- Node.js 18+
-
-### Setup
 ```bash
-# Install dependencies
-yarn install
+# Install Rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
+# Install Solana CLI
+sh -c "$(curl -sSfL https://release.solana.com/stable/install)"
+
+# Install Anchor
+cargo install --git https://github.com/coral-xyz/anchor anchor-cli --locked
+```
+
+### Build & Test
+```bash
 # Build programs
 anchor build
 
@@ -56,53 +72,21 @@ anchor test
 
 # Deploy to devnet
 anchor deploy --provider.cluster devnet
-Local Development
-bash# Start local validator
-solana-test-validator
 
-# Deploy locally
-anchor deploy --provider.cluster localnet
+# Deploy to mainnet
+anchor deploy --provider.cluster mainnet
+```
 
-# Run integration tests
-yarn test:integration
-SDK Usage
-typescriptimport { MarketplaceClient } from '@fliidotdev/marketplace-sdk';
-import { Connection, Keypair } from '@solana/web3.js';
+## 🔐 Security
 
-const connection = new Connection('https://api.devnet.solana.com');
-const wallet = Keypair.generate();
-const client = new MarketplaceClient(connection, wallet, PROGRAM_ID);
+Security audit in progress. Bug reports: security@fliidotdev.com
 
-// List a component
-await client.listComponent(
-  'component-001',
-  100_000_000n, // 0.1 SOL
-  'ipfs://metadata'
-);
+## 📄 License
 
-// Purchase a component
-await client.purchaseComponent(
-  'component-001',
-  componentPubkey,
-  creatorTokenAccount,
-  marketplaceTokenAccount
-);
-Contract Addresses
-Devnet
+MIT © [FLII.dev](https://flii.dev)
 
-Marketplace: FLiixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-Revenue Share: FLiiRSxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-Token: FLiiTKxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+## 🔗 Links
 
-Mainnet
-
-TBD
-
-Security
-
-All contracts audited by [Audit Firm]
-Bug bounty program active
-Formal verification completed
-
-License
-MIT
+- [Documentation](https://docs.fliidotdev.com/marketplace)
+- [Website](https://flii.dev)
+- [X (Twitter)](https://twitter.com/fliidotdev)
