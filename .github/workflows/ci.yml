@@ -39,7 +39,7 @@ jobs:
         run: anchor build
         
       - name: Run tests
-        run: anchor test
+        run: ./test-ci.sh
         env:
           CI: true
 
