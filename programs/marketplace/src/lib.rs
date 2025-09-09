@@ -6,8 +6,8 @@ declare_id!("FLiixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 #[program]
 pub mod marketplace {
     use super::*;
-    use anchor_spl::token::{Mint, SetAuthority};
     use anchor_spl::associated_token::AssociatedToken;
+    use anchor_spl::token::{Mint, SetAuthority};
     use spl_token::instruction::AuthorityType;
 
     pub fn initialize(
@@ -16,8 +16,11 @@ pub mod marketplace {
         creator_fee_percentage: u16,
     ) -> Result<()> {
         require!(fee_percentage <= 1000, ErrorCode::InvalidFeePercentage); // Max 10%
-        require!(creator_fee_percentage <= 500, ErrorCode::InvalidFeePercentage); // Max 5%
-        
+        require!(
+            creator_fee_percentage <= 500,
+            ErrorCode::InvalidFeePercentage
+        ); // Max 5%
+
         let marketplace = &mut ctx.accounts.marketplace;
         marketplace.authority = ctx.accounts.authority.key();
         marketplace.fee_percentage = fee_percentage;
@@ -27,7 +30,7 @@ pub mod marketplace {
         marketplace.total_sales = 0;
         marketplace.escrow_account = ctx.accounts.escrow_account.key();
         marketplace.treasury = ctx.accounts.treasury.key();
-        
+
         Ok(())
     }
 
@@ -39,7 +42,7 @@ pub mod marketplace {
     ) -> Result<()> {
         require!(price > 0, ErrorCode::InvalidPrice);
         require!(component_id.len() <= 32, ErrorCode::ComponentIdTooLong);
-        
+
         let component = &mut ctx.accounts.component;
         component.creator = ctx.accounts.creator.key();
         component.component_id = component_id;
@@ -48,16 +51,16 @@ pub mod marketplace {
         component.is_active = true;
         component.total_sales = 0;
         component.created_at = Clock::get()?.unix_timestamp;
-        
+
         let marketplace = &mut ctx.accounts.marketplace;
         marketplace.total_components += 1;
-        
+
         emit!(ComponentListed {
             component_id: component.component_id.clone(),
             creator: component.creator,
             price: component.price,
         });
-        
+
         Ok(())
     }
 
@@ -68,7 +71,7 @@ pub mod marketplace {
         auction_end: Option<i64>,
     ) -> Result<()> {
         require!(price > 0, ErrorCode::InvalidPrice);
-        
+
         let listing = &mut ctx.accounts.listing;
         listing.seller = ctx.accounts.seller.key();
         listing.nft_mint = ctx.accounts.nft_mint.key();
@@ -79,27 +82,24 @@ pub mod marketplace {
         listing.highest_bidder = None;
         listing.is_active = true;
         listing.created_at = Clock::get()?.unix_timestamp;
-        listing.listing_type = if auction_end.is_some() { 
-            ListingType::Auction 
-        } else { 
-            ListingType::FixedPrice 
+        listing.listing_type = if auction_end.is_some() {
+            ListingType::Auction
+        } else {
+            ListingType::FixedPrice
         };
-        
+
         // Transfer NFT to escrow
         let cpi_accounts = Transfer {
             from: ctx.accounts.seller_nft_account.to_account_info(),
             to: ctx.accounts.escrow_nft_account.to_account_info(),
             authority: ctx.accounts.seller.to_account_info(),
         };
-        let cpi_ctx = CpiContext::new(
-            ctx.accounts.token_program.to_account_info(),
-            cpi_accounts
-        );
+        let cpi_ctx = CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts);
         token::transfer(cpi_ctx, 1)?;
-        
+
         let marketplace = &mut ctx.accounts.marketplace;
         marketplace.total_listings += 1;
-        
+
         emit!(NFTListed {
             listing_id: listing.key(),
             seller: listing.seller,
@@ -107,30 +107,30 @@ pub mod marketplace {
             price: listing.price,
             listing_type: listing.listing_type,
         });
-        
+
         Ok(())
     }
-    
-    pub fn place_bid(
-        ctx: Context<PlaceBid>,
-        bid_amount: u64,
-    ) -> Result<()> {
+
+    pub fn place_bid(ctx: Context<PlaceBid>, bid_amount: u64) -> Result<()> {
         let listing = &mut ctx.accounts.listing;
         require!(listing.is_active, ErrorCode::ListingNotActive);
-        require!(listing.listing_type == ListingType::Auction, ErrorCode::NotAnAuction);
-        
+        require!(
+            listing.listing_type == ListingType::Auction,
+            ErrorCode::NotAnAuction
+        );
+
         let current_time = Clock::get()?.unix_timestamp;
         if let Some(end_time) = listing.auction_end {
             require!(current_time < end_time, ErrorCode::AuctionEnded);
         }
-        
+
         let min_bid = if listing.highest_bid > 0 {
             listing.highest_bid + listing.min_bid_increment
         } else {
             listing.price
         };
         require!(bid_amount >= min_bid, ErrorCode::BidTooLow);
-        
+
         // Refund previous highest bidder if exists
         if let Some(previous_bidder) = listing.highest_bidder {
             let refund_accounts = Transfer {
@@ -138,53 +138,48 @@ pub mod marketplace {
                 to: ctx.accounts.previous_bidder_account.to_account_info(),
                 authority: ctx.accounts.marketplace.to_account_info(),
             };
-            let seeds = &[
-                b"marketplace".as_ref(),
-                &[ctx.bumps.marketplace],
-            ];
+            let seeds = &[b"marketplace".as_ref(), &[ctx.bumps.marketplace]];
             let signer = &[&seeds[..]];
             let refund_ctx = CpiContext::new_with_signer(
                 ctx.accounts.token_program.to_account_info(),
                 refund_accounts,
-                signer
+                signer,
             );
             token::transfer(refund_ctx, listing.highest_bid)?;
         }
-        
+
         // Transfer new bid to escrow
         let cpi_accounts = Transfer {
             from: ctx.accounts.bidder_payment_account.to_account_info(),
             to: ctx.accounts.escrow_payment_account.to_account_info(),
             authority: ctx.accounts.bidder.to_account_info(),
         };
-        let cpi_ctx = CpiContext::new(
-            ctx.accounts.token_program.to_account_info(),
-            cpi_accounts
-        );
+        let cpi_ctx = CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts);
         token::transfer(cpi_ctx, bid_amount)?;
-        
+
         listing.highest_bid = bid_amount;
         listing.highest_bidder = Some(ctx.accounts.bidder.key());
-        
+
         emit!(BidPlaced {
             listing_id: listing.key(),
             bidder: ctx.accounts.bidder.key(),
             bid_amount,
         });
-        
+
         Ok(())
     }
-    
-    pub fn accept_offer(
-        ctx: Context<AcceptOffer>,
-    ) -> Result<()> {
+
+    pub fn accept_offer(ctx: Context<AcceptOffer>) -> Result<()> {
         let listing = &mut ctx.accounts.listing;
         let offer = &ctx.accounts.offer;
-        
+
         require!(listing.is_active, ErrorCode::ListingNotActive);
-        require!(listing.seller == ctx.accounts.seller.key(), ErrorCode::UnauthorizedSeller);
+        require!(
+            listing.seller == ctx.accounts.seller.key(),
+            ErrorCode::UnauthorizedSeller
+        );
         require!(offer.is_active, ErrorCode::OfferNotActive);
-        
+
         // Execute the trade
         execute_nft_sale(
             &ctx.accounts.token_program,
@@ -200,31 +195,32 @@ pub mod marketplace {
             ctx.accounts.marketplace.fee_percentage,
             ctx.accounts.marketplace.creator_fee_percentage,
         )?;
-        
+
         listing.is_active = false;
         offer.is_active = false;
-        
+
         let marketplace = &mut ctx.accounts.marketplace;
         marketplace.total_sales += 1;
         marketplace.total_volume += offer.amount;
-        
+
         emit!(SaleExecuted {
             listing_id: listing.key(),
             seller: listing.seller,
             buyer: offer.buyer,
             price: offer.amount,
         });
-        
+
         Ok(())
     }
-    
-    pub fn purchase_nft(
-        ctx: Context<PurchaseNFT>,
-    ) -> Result<()> {
+
+    pub fn purchase_nft(ctx: Context<PurchaseNFT>) -> Result<()> {
         let listing = &mut ctx.accounts.listing;
         require!(listing.is_active, ErrorCode::ListingNotActive);
-        require!(listing.listing_type == ListingType::FixedPrice, ErrorCode::NotFixedPrice);
-        
+        require!(
+            listing.listing_type == ListingType::FixedPrice,
+            ErrorCode::NotFixedPrice
+        );
+
         let marketplace = &ctx.accounts.marketplace;
         let total_price = listing.price;
         let platform_fee = total_price
@@ -246,7 +242,7 @@ pub mod marketplace {
             .unwrap()
             .checked_sub(creator_fee)
             .unwrap();
-        
+
         // Transfer to creator (70% in this case if fee is 30%)
         let cpi_accounts = Transfer {
             from: ctx.accounts.buyer_token_account.to_account_info(),
@@ -256,7 +252,7 @@ pub mod marketplace {
         let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
         token::transfer(cpi_ctx, creator_amount)?;
-        
+
         // Transfer fee to marketplace
         let cpi_accounts = Transfer {
             from: ctx.accounts.buyer_token_account.to_account_info(),
@@ -266,27 +262,27 @@ pub mod marketplace {
         let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
         token::transfer(cpi_ctx, fee_amount)?;
-        
+
         // Record purchase
         let purchase = &mut ctx.accounts.purchase;
         purchase.buyer = ctx.accounts.buyer.key();
         purchase.component_id = component.component_id.clone();
         purchase.price = component.price;
         purchase.purchased_at = Clock::get()?.unix_timestamp;
-        
+
         // Update stats
         let component = &mut ctx.accounts.component;
         component.total_sales += 1;
-        
+
         let marketplace = &mut ctx.accounts.marketplace;
         marketplace.total_volume += component.price;
-        
+
         emit!(ComponentPurchased {
             component_id: component.component_id.clone(),
             buyer: ctx.accounts.buyer.key(),
             price: component.price,
         });
-        
+
         Ok(())
     }
 }

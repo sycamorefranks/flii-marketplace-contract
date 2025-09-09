@@ -16,32 +16,27 @@ pub mod revenue_share {
             creator_share + platform_share == 10000,
             ErrorCode::InvalidShares
         );
-        
+
         let pool = &mut ctx.accounts.pool;
         pool.authority = ctx.accounts.authority.key();
         pool.creator_share = creator_share;
         pool.platform_share = platform_share;
         pool.total_distributed = 0;
-        
+
         Ok(())
     }
 
-    pub fn distribute_revenue(
-        ctx: Context<DistributeRevenue>,
-        amount: u64,
-    ) -> Result<()> {
+    pub fn distribute_revenue(ctx: Context<DistributeRevenue>, amount: u64) -> Result<()> {
         let pool = &ctx.accounts.pool;
-        
+
         let creator_amount = amount
             .checked_mul(pool.creator_share as u64)
             .unwrap()
             .checked_div(10000)
             .unwrap();
-            
-        let platform_amount = amount
-            .checked_sub(creator_amount)
-            .unwrap();
-        
+
+        let platform_amount = amount.checked_sub(creator_amount).unwrap();
+
         // Transfer to creator
         let cpi_accounts = Transfer {
             from: ctx.accounts.source_account.to_account_info(),
@@ -51,7 +46,7 @@ pub mod revenue_share {
         let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
         token::transfer(cpi_ctx, creator_amount)?;
-        
+
         // Transfer to platform
         let cpi_accounts = Transfer {
             from: ctx.accounts.source_account.to_account_info(),
@@ -61,16 +56,16 @@ pub mod revenue_share {
         let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
         token::transfer(cpi_ctx, platform_amount)?;
-        
+
         let pool = &mut ctx.accounts.pool;
         pool.total_distributed += amount;
-        
+
         emit!(RevenueDistributed {
             amount,
             creator_amount,
             platform_amount,
         });
-        
+
         Ok(())
     }
 }
