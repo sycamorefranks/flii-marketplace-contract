@@ -375,7 +375,7 @@ Collection: DevCollXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 ## Contributing
 
-We welcome contributions! Please see our [Contributing Guide](./CONTRIBUTING.md) for details.
+We welcome contributions! Please reach out on [X/Twitter](https://twitter.com/fliidotdev) for details.
 
 ### Development
 
@@ -398,8 +398,8 @@ MIT License - see [LICENSE](./LICENSE) for details.
 
 - [Documentation](https://flii.dev/docs)
 - [API Reference](https://flii.dev/docs)
-- [Demo Marketplace](https://marketplace.flii.dev)
 - [GitHub](https://github.com/fliidotdev)
+- [X/Twitter](https://twitter.com/fliidotdev)
 
 ---
 

@@ -14,7 +14,7 @@
   },
   "devDependencies": {
     "@coral-xyz/anchor": "^0.29.0",
-    "@solana/web3.js": "^1.87.6",
+    "@solana/web3.js": "^1.98.4",
     "@types/chai": "^5.2.2",
     "@types/mocha": "^10.0.6",
     "@types/node": "^20.11.0",
@@ -28,5 +28,8 @@
     "url": "https://github.com/fliidotdev/marketplace-contracts.git"
   },
   "author": "fliidotdev",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "bs58": "^6.0.0"
+  }
 }

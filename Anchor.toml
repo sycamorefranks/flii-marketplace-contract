@@ -3,12 +3,17 @@ seeds = false
 skip-lint = false
 
 [programs.localnet]
-marketplace = "FLiixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+marketplace = "6oN2gtocsfZ1ex6WywYrsV6o15iQoqDcqoeK96fhJRiF"
 revenue_share = "FLiiRSxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 token = "FLiiTKxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
 [programs.devnet]
-marketplace = "FLiixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+marketplace = "6oN2gtocsfZ1ex6WywYrsV6o15iQoqDcqoeK96fhJRiF"
+revenue_share = "FLiiRSxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+token = "FLiiTKxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+[programs.mainnet]
+marketplace = "3RAeCuRqF9kGXyXwk9Lynj19fuxJJj5RXCga9KiihaKF"
 revenue_share = "FLiiRSxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 token = "FLiiTKxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
@@ -16,7 +21,7 @@ token = "FLiiTKxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Devnet"
+cluster = "Mainnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
